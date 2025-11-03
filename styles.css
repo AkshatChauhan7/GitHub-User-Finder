@@ -149,6 +149,62 @@ button[disabled], .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
 .loader{padding:1.25rem;text-align:center;color:var(--muted);font-style:italic}
 .error-container{margin-top:1rem;padding:1rem;background:rgba(255,255,255,0.9);border-radius:12px;border:1px solid rgba(16,24,40,0.04);color:var(--error)}
 
+.top-repo-card {
+  background: var(--accent-100);
+  border-color: var(--accent-600);
+}
+
+
+.repos-container.receipt-style {
+  font-family: 'Courier New', Courier, monospace;
+  background: #fff;
+  color: #000;
+  border: 1px dashed #333;
+  padding: 1.25rem;
+  border-radius: 6px;
+  max-width: 500px;
+  margin: 0 auto; 
+  display: block; 
+}
+
+.receipt-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dotted #777;
+}
+
+.receipt-line .repo-name {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+}
+
+.receipt-line .repo-stats {
+  color: #333;
+  font-weight: 600;
+}
+
+.theme-dark .repos-container.receipt-style {
+  background: #f0f0f0;
+  color: #000;
+  border-color: #333;
+}
+
+.theme-dark .receipt-line .repo-name {
+  color: #000;
+}
+
+.theme-dark .receipt-line .repo-stats {
+  color: #333;
+}
+
+.repo-card {
+  display: none;
+}
+
 
 .hidden{display:none!important}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -177,3 +233,95 @@ button[disabled], .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
 }
 
 @media print{body{background:#fff;color:#000} .search-container,button,.btn{display:none}}
+
+
+.repo-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.repos-container.receipt-style {
+  font-family: 'Courier New', Courier, monospace;
+  background: #fff;
+  color: #000;
+  border: 2px dashed #333;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 0 auto;
+  display: block; 
+}
+
+.receipt-header {
+  text-align: center;
+  border-bottom: 2px dashed #333;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+.receipt-header h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.receipt-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.receipt-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px dotted #777;
+}
+
+.receipt-line .repo-name {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1rem;
+}
+
+.receipt-line .repo-stats {
+  color: #333;
+  font-weight: 600;
+  flex-shrink: 0; 
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.theme-dark .repos-container.receipt-style {
+  background: #f4f4f4;
+  color: #000;
+  border-color: #333;
+}
+.theme-dark .receipt-header p,
+.theme-dark .receipt-line .repo-stats,
+.theme-dark .receipt-footer {
+  color: #333;
+}
+.theme-dark .receipt-line .repo-name {
+  color: #000;
+}
+
+.receipt-style .repo-card {
+  display: none;
+}
+.repos-container:not(.receipt-style) .receipt-header,
+.repos-container:not(.receipt-style) .receipt-line,
+.repos-container:not(.receipt-style) .receipt-footer {
+  display: none;
+}

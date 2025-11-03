@@ -21,11 +21,36 @@ const twitterContainer = document.getElementById("twitter-container");
 const reposContainer = document.getElementById("repos-container");
 const themeToggle = document.getElementById("theme-toggle");
 
+const showReceiptBtn = document.getElementById("show-receipt-btn");
+const showCardsBtn = document.getElementById("show-cards-btn");
+const downloadReceiptBtn = document.getElementById("download-receipt-btn");
+
+let currentRepos = []; 
+
 if (searchBtn) searchBtn.addEventListener("click", searchUser);
 
 if (searchInput) searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") searchUser();
 });
+
+if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+
+if (showReceiptBtn) showReceiptBtn.addEventListener('click', () => {
+  displayReposAsReceipt(currentRepos);
+  showCardsBtn.classList.remove('hidden');
+  downloadReceiptBtn.classList.remove('hidden');
+  showReceiptBtn.classList.add('hidden');
+});
+
+if (showCardsBtn) showCardsBtn.addEventListener('click', () => {
+  displayReposAsCards(currentRepos);
+  showCardsBtn.classList.add('hidden');
+  downloadReceiptBtn.classList.add('hidden');
+  showReceiptBtn.classList.remove('hidden');
+});
+
+if (downloadReceiptBtn) downloadReceiptBtn.addEventListener('click', downloadReceipt);
+
 
 function applyTheme(theme) {
   const root = document.documentElement;
@@ -45,6 +70,13 @@ function applyTheme(theme) {
   }
 }
 
+function toggleTheme() {
+  const isDark = document.documentElement.classList.contains('theme-dark');
+  const next = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('theme', next); } catch (e) {}
+}
+
 function initTheme() {
   const saved = localStorage.getItem("theme");
   let theme = saved;
@@ -55,27 +87,22 @@ function initTheme() {
   applyTheme(theme);
 }
 
-if (themeToggle) {
-  themeToggle.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.contains('theme-dark');
-    const next = isDark ? 'light' : 'dark';
-    applyTheme(next);
-    try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
-  });
-}
-
 async function searchUser() {
   const username = searchInput.value.trim();
 
   if (errorContainer) errorContainer.classList.add("hidden");
   if (profileContainer) profileContainer.classList.add("hidden");
 
+  currentRepos = [];
+  showReceiptBtn.classList.add('hidden');
+  showCardsBtn.classList.add('hidden');
+  downloadReceiptBtn.classList.add('hidden');
+
   try {
     const response = await fetch(`https://api.github.com/users/${username}`);
     if (!response.ok) throw new Error("User not found");
 
     const userdata = await response.json();
-    console.log("userdata", userdata);
     displayUserData(userdata);
   } catch (error) {
     console.error(error);
@@ -83,25 +110,54 @@ async function searchUser() {
   }
 }
 
-function displayRepos(reposList) {
+function downloadReceipt() {
+  const receiptElement = document.getElementById("repos-container");
+  
+  const originalText = downloadReceiptBtn.innerHTML;
+  downloadReceiptBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Downloading...`;
+  downloadReceiptBtn.disabled = true;
+
+  html2canvas(receiptElement, {
+      scale: 2, 
+      useCORS: true, 
+      onclone: (document) => {
+        document.getElementById("repos-container").style.background = "#f4f4f4";
+      }
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `github-receipt-${usernameElement.textContent.replace('@', '')}.png`;
+    link.href = canvas.toDataURL("image/png");
+    
+    link.click();
+
+    downloadReceiptBtn.innerHTML = originalText;
+    downloadReceiptBtn.disabled = false;
+  }).catch(err => {
+    console.error("Failed to download image:", err);
+    downloadReceiptBtn.innerHTML = "Download Failed";
+  });
+}
+
+function displayReposAsCards(reposList) {
   if (!reposContainer) return;
+  reposContainer.classList.remove("receipt-style"); 
+  reposContainer.innerHTML = ""; 
 
   if (!Array.isArray(reposList) || reposList.length === 0) {
     reposContainer.innerHTML = '<div class="no-repos">No repositories found</div>';
     return;
   }
 
-  reposContainer.innerHTML = "";
-
   reposList.forEach((repo) => {
     const repoCard = document.createElement("div");
     repoCard.className = "repo-card";
-
     const updatedAt = formatDate(repo.updated_at);
+    
+    const icon = `<i class="fas fa-star" style="color: #f59e0b;" aria-label="Latest Repo"></i>`;
 
     repoCard.innerHTML = `
       <a href="${repo.html_url}" target="_blank" class="repo-name">
-        <i class="fas fa-code-branch"></i> ${repo.name}
+        ${icon} ${repo.name}
       </a>
       <p class="repo-description">${repo.description || "No description available"}</p>
       <div class="repo-meta">
@@ -111,13 +167,54 @@ function displayRepos(reposList) {
         <div class="repo-meta-item"><i class="fas fa-history"></i> ${updatedAt}</div>
       </div>
     `;
-
     reposContainer.appendChild(repoCard);
   });
 }
 
+function displayReposAsReceipt(reposList) {
+  if (!reposContainer) return;
+  reposContainer.classList.add("receipt-style"); 
+  reposContainer.innerHTML = ""; 
+
+  if (!Array.isArray(reposList) || reposList.length === 0) {
+    reposContainer.innerHTML = '<div class="no-repos">No repositories found</div>';
+    return;
+  }
+
+  let receiptHTML = `
+    <div class="receipt-header">
+      <h4>GitHub Receipt</h4>
+      <p>For: <strong>${nameElement.textContent}</strong> (${usernameElement.textContent})</p>
+      <p>Latest 10 Repositories (by Stars)</p>
+    </div>
+  `;
+
+  reposList.forEach((repo) => {
+    receiptHTML += `
+      <div class="receipt-line">
+        <a href="${repo.html_url}" target="_blank" class="repo-name">
+          ${repo.name}
+        </a>
+        <span class="repo-stats">
+          ${repo.stargazers_count} ★
+        </span>
+      </div>
+    `;
+  });
+
+  receiptHTML += `
+    <div class="receipt-footer">
+      <p>THANK YOU FOR YOUR CONTRIBUTIONS</p>
+    </div>
+  `;
+
+  reposContainer.innerHTML = receiptHTML;
+}
+
 async function fetchRepositories(reposUrl) {
   if (!reposContainer) return;
+  
+  reposContainer.classList.remove("receipt-style");
   reposContainer.innerHTML = `
     <div class="loading-repos" role="status" aria-live="polite">
       <span class="spinner" aria-hidden="true"></span>
@@ -126,11 +223,21 @@ async function fetchRepositories(reposUrl) {
   `;
 
   try {
-    const response = await fetch(reposUrl + "?per_page=6&sort=updated");
+    const response = await fetch(reposUrl + "?per_page=10&sort=stargazers_count&direction=desc");
     if (!response.ok) throw new Error('Failed to fetch repositories');
-    const repos = await response.json();
-    displayRepos(repos);
+    
+    currentRepos = await response.json(); 
+    
+    displayReposAsCards(currentRepos);
+    
+    if (currentRepos.length > 0) {
+      showReceiptBtn.classList.remove('hidden');
+      showCardsBtn.classList.add('hidden');
+      downloadReceiptBtn.classList.add('hidden');
+    }
+    
   } catch (error) {
+    currentRepos = [];
     reposContainer.innerHTML = `<div class="no-repos">${error.message}</div>`;
   }
 }
@@ -141,7 +248,6 @@ function displayUserData(user) {
   if (nameElement) nameElement.textContent = user.name || user.login;
   if (usernameElement) usernameElement.textContent = `@${user.login}`;
   if (bioElement) bioElement.textContent = user.bio || "No bio available";
-
   if (locationElement) locationElement.textContent = user.location || "Not specified";
   if (joinedDateElement) joinedDateElement.textContent = formatDate(user.created_at);
 
@@ -153,10 +259,9 @@ function displayUserData(user) {
   if (followers) followers.textContent = user.followers;
   if (following) following.textContent = user.following;
   if (repos) repos.textContent = user.public_repos;
-
   if (companyElement) companyElement.textContent = user.company || "Not specified";
 
-  if (user.blog && blogElement) {
+  if (user.blog && user.blog !== "") {
     blogElement.textContent = user.blog;
     blogElement.href = user.blog.startsWith("http") ? user.blog : `https://${user.blog}`;
     if (blogContainer) blogContainer.style.display = "flex";
@@ -166,7 +271,7 @@ function displayUserData(user) {
     if (blogContainer) blogContainer.style.display = "flex";
   }
 
-  if (user.twitter_username && twitterElement) {
+  if (user.twitter_username) {
     twitterElement.textContent = `@${user.twitter_username}`;
     twitterElement.href = `https://twitter.com/${user.twitter_username}`;
     if (twitterContainer) twitterContainer.style.display = "flex";
