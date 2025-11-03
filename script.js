@@ -21,15 +21,12 @@ const twitterContainer = document.getElementById("twitter-container");
 const reposContainer = document.getElementById("repos-container");
 const themeToggle = document.getElementById("theme-toggle");
 
-// Click on button
 if (searchBtn) searchBtn.addEventListener("click", searchUser);
 
-// Enter on input
 if (searchInput) searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") searchUser();
 });
 
-// Theme toggle (light / dark)
 function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === "dark") {
@@ -38,7 +35,6 @@ function applyTheme(theme) {
     root.classList.remove("theme-dark");
   }
 
-  // update toggle state/icon
   if (themeToggle) {
     const icon = themeToggle.querySelector("i");
     themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
@@ -53,7 +49,6 @@ function initTheme() {
   const saved = localStorage.getItem("theme");
   let theme = saved;
   if (!theme) {
-    // fallback to system preference
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     theme = prefersDark ? 'dark' : 'light';
   }
@@ -72,7 +67,6 @@ if (themeToggle) {
 async function searchUser() {
   const username = searchInput.value.trim();
 
-  // reset UI
   if (errorContainer) errorContainer.classList.add("hidden");
   if (profileContainer) profileContainer.classList.add("hidden");
 
@@ -124,7 +118,6 @@ function displayRepos(reposList) {
 
 async function fetchRepositories(reposUrl) {
   if (!reposContainer) return;
-  // show spinner + text while loading
   reposContainer.innerHTML = `
     <div class="loading-repos" role="status" aria-live="polite">
       <span class="spinner" aria-hidden="true"></span>
@@ -186,7 +179,6 @@ function displayUserData(user) {
   if (profileContainer) profileContainer.classList.remove("hidden");
   if (errorContainer) errorContainer.classList.add("hidden");
 
-  // fetch and show repositories
   if (user.repos_url) fetchRepositories(user.repos_url);
 }
 
@@ -204,11 +196,7 @@ function formatDate(dateString) {
   });
 }
 
-// Example default search (remove or change to test other users)
 if (searchInput) {
   searchInput.value = "";
-  // run initial theme setup
   initTheme();
-  // do not auto-search by default; uncomment to run initial lookup
-  // searchUser();
 }
