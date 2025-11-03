@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub User Finder</title>
+    <title>ReceiptHub</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -11,9 +11,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>
-                    <i class="fas fa-github"></i> GitHub User Finder
-                </h1>
+      <h1>
+          <i class="fab fa-github" aria-hidden="true"></i>ReceiptHub
+        </h1>
                 <p>Search for GitHub users </p>
                 <button id="theme-toggle" class="btn btn-ghost btn-icon" aria-pressed="false" aria-label="Toggle color theme">
                   <i class="fas fa-moon" aria-hidden="true"></i>
@@ -83,13 +83,13 @@
           <h3>Latest Repositories</h3>
           
           <div class="repo-controls">
-            <button id="show-receipt-btn" class="btn btn-outline hidden">
+            <button id="show-receipt-btn" type="button" class="btn btn-outline hidden">
               <i class="fas fa-receipt"></i> Show Receipt
             </button>
-            <button id="show-cards-btn" class="btn btn-outline hidden">
+            <button id="show-cards-btn" type="button" class="btn btn-outline hidden">
               <i class="fas fa-th-large"></i> Show Cards
             </button>
-            <button id="download-receipt-btn" class="btn hidden">
+            <button id="download-receipt-btn" type="button" class="btn hidden">
               <i class="fas fa-download"></i> Download Receipt
             </button>
           </div>

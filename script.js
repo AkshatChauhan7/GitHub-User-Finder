@@ -35,19 +35,44 @@ if (searchInput) searchInput.addEventListener("keydown", (e) => {
 
 if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 
-if (showReceiptBtn) showReceiptBtn.addEventListener('click', () => {
-  displayReposAsReceipt(currentRepos);
-  showCardsBtn.classList.remove('hidden');
-  downloadReceiptBtn.classList.remove('hidden');
-  showReceiptBtn.classList.add('hidden');
-});
+function switchToReceiptView() {
+  console.debug('switchToReceiptView called', { currentReposLength: currentRepos.length });
+  try {
+    if (!Array.isArray(currentRepos) || currentRepos.length === 0) {
+      console.warn('No repositories available to render as receipt');
+      showerror('No repositories to display');
+      return;
+    }
+    displayReposAsReceipt(currentRepos);
+    if (showCardsBtn) showCardsBtn.classList.remove('hidden');
+    if (downloadReceiptBtn) downloadReceiptBtn.classList.remove('hidden');
+    if (showReceiptBtn) showReceiptBtn.classList.add('hidden');
+  } catch (err) {
+    console.error('Failed to switch to receipt view', err);
+    showerror('Unable to display receipt view');
+  }
+}
 
-if (showCardsBtn) showCardsBtn.addEventListener('click', () => {
-  displayReposAsCards(currentRepos);
-  showCardsBtn.classList.add('hidden');
-  downloadReceiptBtn.classList.add('hidden');
-  showReceiptBtn.classList.remove('hidden');
-});
+function switchToCardsView() {
+  console.debug('switchToCardsView called', { currentReposLength: currentRepos.length });
+  try {
+    if (!Array.isArray(currentRepos) || currentRepos.length === 0) {
+      console.warn('No repositories available to render as cards');
+      showerror('No repositories to display');
+      return;
+    }
+    displayReposAsCards(currentRepos);
+    if (showCardsBtn) showCardsBtn.classList.add('hidden');
+    if (downloadReceiptBtn) downloadReceiptBtn.classList.add('hidden');
+    if (showReceiptBtn) showReceiptBtn.classList.remove('hidden');
+  } catch (err) {
+    console.error('Failed to switch to cards view', err);
+    showerror('Unable to display cards view');
+  }
+}
+
+if (showReceiptBtn) showReceiptBtn.addEventListener('click', switchToReceiptView);
+if (showCardsBtn) showCardsBtn.addEventListener('click', switchToCardsView);
 
 if (downloadReceiptBtn) downloadReceiptBtn.addEventListener('click', downloadReceipt);
 
@@ -89,14 +114,22 @@ function initTheme() {
 
 async function searchUser() {
   const username = searchInput.value.trim();
+  if (!username) {
+    if (errorContainer) {
+      showerror('Please enter a GitHub username');
+    } else {
+      alert('Please enter a GitHub username');
+    }
+    return;
+  }
 
   if (errorContainer) errorContainer.classList.add("hidden");
   if (profileContainer) profileContainer.classList.add("hidden");
 
   currentRepos = [];
-  showReceiptBtn.classList.add('hidden');
-  showCardsBtn.classList.add('hidden');
-  downloadReceiptBtn.classList.add('hidden');
+  if (showReceiptBtn) showReceiptBtn.classList.add('hidden');
+  if (showCardsBtn) showCardsBtn.classList.add('hidden');
+  if (downloadReceiptBtn) downloadReceiptBtn.classList.add('hidden');
 
   try {
     const response = await fetch(`https://api.github.com/users/${username}`);
@@ -231,9 +264,9 @@ async function fetchRepositories(reposUrl) {
     displayReposAsCards(currentRepos);
     
     if (currentRepos.length > 0) {
-      showReceiptBtn.classList.remove('hidden');
-      showCardsBtn.classList.add('hidden');
-      downloadReceiptBtn.classList.add('hidden');
+      if (showReceiptBtn) showReceiptBtn.classList.remove('hidden');
+      if (showCardsBtn) showCardsBtn.classList.remove('hidden');
+      if (downloadReceiptBtn) downloadReceiptBtn.classList.add('hidden');
     }
     
   } catch (error) {
@@ -288,7 +321,12 @@ function displayUserData(user) {
 }
 
 function showerror() {
-  if (errorContainer) errorContainer.classList.remove("hidden");
+  const msg = arguments.length ? arguments[0] : undefined;
+  if (errorContainer) {
+    const p = errorContainer.querySelector('p');
+    if (p && msg) p.textContent = msg;
+    errorContainer.classList.remove("hidden");
+  }
   if (profileContainer) profileContainer.classList.add("hidden");
 }
 
